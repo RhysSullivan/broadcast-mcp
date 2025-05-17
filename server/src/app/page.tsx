@@ -1,13 +1,10 @@
 "use client";
-import { RegisterMcpServer, useMcpServer } from "@/components/mcp/mcp-server";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 function Email(props: {
   email: { from: string; subject: string; body: string };
 }) {
-  const server = useMcpServer();
-
   // server.resource(
   //   `email://${props.email.from}`,
   //   new ResourceTemplate("email://{name}", { list: undefined }),

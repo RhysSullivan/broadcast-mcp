@@ -28,5 +28,5 @@
     "composite": true,
     "types": ["@types/node"]
   },
-  "include": ["src/**/*.ts", "worker-configuration.d.ts", "src/mcp-server/server.js", "src/mcp-server/index.ts"]
+  "include": ["src/**/*.ts", "worker-configuration.d.ts"]
 }
