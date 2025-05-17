@@ -1,7 +1,4 @@
-import {
-  PostMessageClientTransport,
-  PostMessageServerTransport,
-} from "./transport";
+import { PostMessageServerTransport } from "./transport";
 import {
   McpServer,
   ReadResourceCallback,

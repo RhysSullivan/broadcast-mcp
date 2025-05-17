@@ -134,6 +134,25 @@ export default function Chat() {
   ) => {
     const m = JSON.parse(options?.body as string) as any;
 
+    // Create the chat first if it doesn't exist
+    try {
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: m.messages,
+          chatId: m.chatId,
+          userId: m.userId,
+          selectedModel: m.selectedModel,
+          mcpServers: m.mcpServers,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to create chat:", error);
+    }
+
     const { tools, cleanup } = await initializeMCPClients(
       m.mcpServers,
       options?.signal ?? undefined
@@ -176,16 +195,20 @@ export default function Chat() {
         console.error(JSON.stringify(error, null, 2));
       },
       onFinish: async (messages) => {
-        // Save messages to database after completion
         try {
+          // Ensure messages is an array
+          const messagesArray = Array.isArray(messages) ? messages : [messages];
+
+          // Save final state of messages
           await fetch("/api/chat/messages", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              messages,
+              messages: messagesArray,
               chatId: m.chatId,
+              append: false, // Replace all messages with final state
             }),
           });
         } catch (error) {
@@ -194,7 +217,21 @@ export default function Chat() {
         cleanup();
       },
     });
-    return result.toDataStreamResponse();
+    return result.toDataStreamResponse({
+      sendReasoning: true,
+      headers: {
+        "X-Chat-ID": m.chatId,
+      },
+      getErrorMessage: (error) => {
+        if (error instanceof Error) {
+          if (error.message.includes("Rate limit")) {
+            return "Rate limit exceeded. Please try again later.";
+          }
+        }
+        console.error(error);
+        return "An error occurred.";
+      },
+    });
   };
 
   const { messages, input, handleInputChange, handleSubmit, status, stop } =
