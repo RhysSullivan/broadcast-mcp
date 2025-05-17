@@ -2,13 +2,25 @@
   "name": "mcp-browser-transport",
   "version": "1.0.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "dev:client": "cd examples/client && bun run dev",
     "dev:server": "cd examples/server && bun run dev",
-    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\""
+    "dev:all": "concurrently \"bun run dev\" \"bun run dev:client\" \"bun run dev:server\""
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "tsup": "^8.5.0"
   },
   "peerDependencies": {
     "typescript": "^5"

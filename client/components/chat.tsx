@@ -19,7 +19,7 @@ import { useMCP } from "@/lib/context/mcp-context";
 import { createOpenAI } from "@ai-sdk/openai";
 import { smoothStream, streamText } from "ai";
 import { initializeMCPClients } from "../lib/mcp-client";
-import { PostMessageClientTransport } from "@/lib/transport";
+import { PostMessageClientTransport } from "mcp-browser-transport";
 
 // Type for chat data from DB
 interface ChatData {
@@ -236,6 +236,7 @@ export default function Chat() {
 
   const { messages, input, handleInputChange, handleSubmit, status, stop } =
     useChat({
+      // @ts-expect-error idk
       fetch: customFetch,
       id: chatId || generatedChatId, // Use generated ID if no chatId in URL
       initialMessages,

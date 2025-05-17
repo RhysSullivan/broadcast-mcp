@@ -1,4 +1,4 @@
-import { PostMessageServerTransport } from "./transport";
+import { PostMessageServerTransport } from "mcp-browser-transport";
 import {
   McpServer,
   ReadResourceCallback,

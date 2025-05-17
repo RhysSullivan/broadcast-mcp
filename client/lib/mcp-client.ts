@@ -1,5 +1,5 @@
 import { experimental_createMCPClient as createMCPClient } from "ai";
-import { PostMessageClientTransport } from "./transport";
+import { PostMessageClientTransport } from "mcp-browser-transport";
 import { transport } from "@/components/chat";
 export interface KeyValuePair {
   key: string;
