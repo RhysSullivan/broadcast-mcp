@@ -1,0 +1,20 @@
+{
+  "name": "mcp-browser-transport",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev:client": "cd examples/client && bun run dev",
+    "dev:server": "cd examples/server && bun run dev",
+    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\""
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.4",
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,150 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+h1 {
+  margin: 0 0 20px 0;
+  font-size: 2.5rem;
+}
+
+.status {
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #2a2a2a;
+}
+
+.controls {
+  margin-bottom: 20px;
+}
+
+button {
+  background: #646cff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background: #747bff;
+}
+
+button:disabled {
+  background: #4a4a4a;
+  cursor: not-allowed;
+}
+
+#messageInput {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: white;
+  margin-right: 10px;
+  width: 300px;
+}
+
+#messageInput:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+#log {
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  padding: 15px;
+  height: 400px;
+  overflow-y: auto;
+  background: #2a2a2a;
+  font-family: monospace;
+}
+
+.log-entry {
+  margin: 5px 0;
+  padding: 8px;
+  background: #333;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vanilla:hover {
+  filter: drop-shadow(0 0 2em #3178c6aa);
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

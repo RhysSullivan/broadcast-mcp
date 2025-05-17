@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCP Client</title>
+    <style>
+      #log {
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        margin: 20px;
+      }
+      .log-entry {
+        margin: 5px 0;
+        padding: 5px;
+        background: #f0f0f0;
+      }
+      .controls {
+        margin: 20px;
+      }
+      .status {
+        font-weight: bold;
+        margin: 20px;
+      }
+      #messageInput {
+        width: 300px;
+        padding: 5px;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MCP Client</h1>
+    <div id="status" class="status">Status: Not connected</div>
+    <div class="controls">
+      <button id="connectBtn">Connect to Server</button>
+      <div id="messageControls" style="margin-top: 20px">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Enter message to echo"
+        />
+        <button id="sendBtn">Send Message</button>
+      </div>
+    </div>
+    <div id="log"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
