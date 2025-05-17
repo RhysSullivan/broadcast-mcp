@@ -1,6 +1,7 @@
 import { createMcpServer } from "@juliusmarminge/trpc-mcp";
 import { z } from "zod";
 import { createDraftData, deserializeFiles, serializedFileSchema } from "../lib/schemas";
+import { defaultPageSize, FOLDERS } from "../lib/utils";
 import { updateWritingStyleMatrix } from "../services/writing-style-service";
 import { activeDriverProcedure, router } from '../trpc/trpc';
 
@@ -43,6 +44,37 @@ const toolRouter = router({
     .query(async ({ input, ctx }) => {
       const { driver } = ctx;
       return await driver.get(input.id);
+    }),
+    list: activeDriverProcedure
+    .meta({
+      mcp: {
+        enabled: true,
+        name: "list",
+        description: "List all emails in a folder",
+      },
+    }).input(
+      z.object({
+        folder: z.string().optional().default('inbox'),
+        q: z.string().optional().default(''),
+        max: z.number().optional().default(defaultPageSize),
+        cursor: z.string().optional().default(''),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { folder, max, cursor, q } = input;
+      const { driver } = ctx;
+
+      if (folder === FOLDERS.DRAFT) {
+        const drafts = await driver.listDrafts({ q, maxResults: max, pageToken: cursor });
+        return drafts;
+      }
+      const threadsResponse = await driver.list({
+        folder,
+        query: q,
+        maxResults: max,
+        pageToken: cursor,
+      });
+      return threadsResponse;
     }),
   send: activeDriverProcedure
     .meta({
