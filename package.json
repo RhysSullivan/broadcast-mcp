@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "bunx concurrently \"cd package && bun run dev\" \"cd client && bun run dev\" \"cd server && bun run dev\"",
-    "build": "cd package && bun run build && cd .. && concurrently \"cd client && bun run build\" \"cd server && bun run build\""
+    "dev": "bunx concurrently \"cd package && bun run dev\" \"cd client && bun run dev\" \"cd server && bun run dev\""
   },
   "workspaces": [
     "client",
