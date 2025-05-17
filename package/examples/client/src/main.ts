@@ -10,8 +10,12 @@ const messageInput = document.getElementById(
 const sendBtn = document.getElementById("sendBtn") as HTMLButtonElement;
 const logElement = document.getElementById("log")!;
 const statusElement = document.getElementById("status")!;
+const keepOpenCheckbox = document.getElementById(
+  "keepOpen"
+) as HTMLInputElement;
 
 let client: Client | undefined;
+let transport: PostMessageClientTransport | undefined;
 
 function addLogEntry(message: string) {
   const entry = document.createElement("div");
@@ -27,12 +31,31 @@ async function connectToServer() {
     connectBtn.disabled = true;
 
     // Create client and transport
-    client = new Client({
-      name: "Demo Client",
-      version: "1.0.0",
-    });
+    if (!client) {
+      client = new Client({
+        name: "Demo Client",
+        version: "1.0.0",
+      });
+    }
 
-    const transport = new PostMessageClientTransport("http://localhost:3000");
+    // Close existing transport if any, before creating a new one with potentially different options
+    if (transport) {
+      await transport.close();
+      transport = undefined;
+    }
+
+    const serverUrl = "http://localhost:3000"; // Or get from an input field
+    const keepWindowOpen = keepOpenCheckbox.checked;
+
+    addLogEntry(
+      `Attempting to connect to ${serverUrl} with keepWindowOpen: ${keepWindowOpen}`
+    );
+
+    transport = new PostMessageClientTransport({
+      serverUrl,
+      keepWindowOpen,
+      openMethod: "window", // Or make this configurable
+    });
 
     transport.onclose = () => {
       statusElement.textContent = "Status: Disconnected";
@@ -107,3 +130,7 @@ sendBtn.addEventListener("click", sendMessage);
 messageInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
+
+// Initialize with default state
+keepOpenCheckbox.checked = false; // Default to not keeping window open
+messageControls.style.display = "none";

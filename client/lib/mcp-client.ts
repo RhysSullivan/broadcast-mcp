@@ -20,6 +20,8 @@ export interface MCPClientManager {
   cleanup: () => Promise<void>;
 }
 
+const McpServerWindowManager = new Map<string, PostMessageClientTransport>();
+
 /**
  * Initialize MCP clients for API calls
  * This uses the already running persistent SSE servers
@@ -39,7 +41,16 @@ export async function initializeMCPClients(
       switch (mcpServer.type) {
         case "web":
           console.log("DEBUG - [initializeMCPClients] Creating web transport");
-          transport = new PostMessageClientTransport(mcpServer.url);
+          if (McpServerWindowManager.has(mcpServer.url)) {
+            transport = McpServerWindowManager.get(mcpServer.url)!;
+          } else {
+            transport = new PostMessageClientTransport({
+              serverUrl: mcpServer.url,
+              keepWindowOpen: true,
+              openMethod: "window",
+            });
+            McpServerWindowManager.set(mcpServer.url, transport);
+          }
           break;
         default:
           // Everything is SSE
