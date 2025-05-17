@@ -22,10 +22,8 @@ export function MyMcp(props: { children: React.ReactNode }) {
         );
         server.tool("increase-count", async () => {
           setCounter(counter + 1);
-          // wait 10 seconds
-          await new Promise((resolve) => setTimeout(resolve, 10000));
           return {
-            content: [{ type: "text", text: String(counter) }],
+            content: [{ type: "text", text: String(counter + 1) }],
           };
         });
         server.resource(
