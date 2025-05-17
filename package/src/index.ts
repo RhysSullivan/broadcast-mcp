@@ -1,4 +1,4 @@
-:// <reference lib="dom" />
+// <reference lib="dom" />
 
 import {
   type Transport,
@@ -20,7 +20,7 @@ export class PostMessageServerTransport implements Transport {
     // Server must be opened by a client
     if (!window.opener) {
       console.error(
-        "DEBUG - [PostMessageServerTransport] No opener window found"
+        "DEBUG - [PostMessageServerTransport] No opener window found",
       );
       throw new Error("Server must be opened by a client window");
     }
@@ -28,21 +28,21 @@ export class PostMessageServerTransport implements Transport {
     // Set up message listener
     window.addEventListener("message", this.handleMessage);
     console.log(
-      "DEBUG - [PostMessageServerTransport] Message listener attached"
+      "DEBUG - [PostMessageServerTransport] Message listener attached",
     );
 
     // Wait for first message from client to establish origin
     await new Promise<void>((resolve) => {
       // Notify opener we're ready once
       console.log(
-        "DEBUG - [PostMessageServerTransport] Sending ready message to opener"
+        "DEBUG - [PostMessageServerTransport] Sending ready message to opener",
       );
       window.opener.postMessage(
         {
           type: "MCP_SERVER_READY",
           [MCP_TRANSPORT_ID]: true,
         },
-        "*"
+        "*",
       );
 
       // Function to check if we're connected
@@ -60,11 +60,11 @@ export class PostMessageServerTransport implements Transport {
 
   async send(
     message: JSONRPCMessage,
-    options?: TransportSendOptions
+    options?: TransportSendOptions,
   ): Promise<void> {
     if (!this.isConnected || !this.clientWindow || !this.clientOrigin) {
       console.error(
-        "DEBUG - [PostMessageServerTransport] Cannot send - not connected to client"
+        "DEBUG - [PostMessageServerTransport] Cannot send - not connected to client",
       );
       throw new Error("Not connected to client");
     }
@@ -73,7 +73,7 @@ export class PostMessageServerTransport implements Transport {
       "DEBUG - [PostMessageServerTransport] Sending message:",
       message,
       "with options:",
-      options
+      options,
     );
     this.clientWindow.postMessage(
       {
@@ -82,13 +82,13 @@ export class PostMessageServerTransport implements Transport {
         options,
         [MCP_TRANSPORT_ID]: true,
       },
-      this.clientOrigin
+      this.clientOrigin,
     );
   }
 
   async close(): Promise<void> {
     console.log(
-      "DEBUG - [PostMessageServerTransport] Closing server connection"
+      "DEBUG - [PostMessageServerTransport] Closing server connection",
     );
     window.removeEventListener("message", this.handleMessage);
     this.isConnected = false;
@@ -99,7 +99,7 @@ export class PostMessageServerTransport implements Transport {
       this.onclose();
     }
     console.log(
-      "DEBUG - [PostMessageServerTransport] Server connection closed"
+      "DEBUG - [PostMessageServerTransport] Server connection closed",
     );
   }
 
@@ -113,13 +113,13 @@ export class PostMessageServerTransport implements Transport {
       "DEBUG - [PostMessageServerTransport] Received message event from origin:",
       event.origin,
       "data:",
-      event.data
+      event.data,
     );
 
     // If this is our first message, establish the client connection
     if (!this.isConnected && event.source === window.opener) {
       console.log(
-        "DEBUG - [PostMessageServerTransport] Establishing client connection"
+        "DEBUG - [PostMessageServerTransport] Establishing client connection",
       );
       this.clientWindow = window.opener;
       this.clientOrigin = event.origin;
@@ -127,14 +127,14 @@ export class PostMessageServerTransport implements Transport {
       this.connectionEstablished = true;
       console.log(
         "DEBUG - [PostMessageServerTransport] Client connection established with origin:",
-        this.clientOrigin
+        this.clientOrigin,
       );
     }
 
     if (event.data.type === "MCP_MESSAGE" && this.onmessage) {
       console.log(
         "DEBUG - [PostMessageServerTransport] Processing MCP message:",
-        event.data.message
+        event.data.message,
       );
       this.onmessage(event.data.message, event.data.extra);
     }
@@ -159,7 +159,7 @@ export class PostMessageClientTransport implements Transport {
 
   async start(): Promise<void> {
     console.log(
-      "DEBUG - [PostMessageClientTransport] Starting connection attempt..."
+      "DEBUG - [PostMessageClientTransport] Starting connection attempt...",
     );
 
     if (this.isConnected) {
@@ -169,7 +169,7 @@ export class PostMessageClientTransport implements Transport {
 
     if (this.connectionPromise) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Connection already in progress, waiting..."
+        "DEBUG - [PostMessageClientTransport] Connection already in progress, waiting...",
       );
       return this.connectionPromise;
     }
@@ -178,7 +178,7 @@ export class PostMessageClientTransport implements Transport {
     const serverWindow = window.open(
       "http://localhost:3001",
       "_blank",
-      "width=400,height=400"
+      "width=400,height=400",
     );
 
     if (!serverWindow) {
@@ -186,14 +186,14 @@ export class PostMessageClientTransport implements Transport {
     }
 
     console.log(
-      "DEBUG - [PostMessageClientTransport] Server window opened successfully"
+      "DEBUG - [PostMessageClientTransport] Server window opened successfully",
     );
     this.serverWindow = serverWindow;
 
     // Set up message listener
     window.addEventListener("message", this.handleMessage);
     console.log(
-      "DEBUG - [PostMessageClientTransport] Message listener attached"
+      "DEBUG - [PostMessageClientTransport] Message listener attached",
     );
 
     // Create a promise that resolves when connection is established
@@ -206,7 +206,7 @@ export class PostMessageClientTransport implements Transport {
 
     // Process any messages that were queued while waiting for connection
     console.log(
-      `DEBUG - [PostMessageClientTransport] Connection established. Processing ${this.messageQueue.length} queued messages`
+      `DEBUG - [PostMessageClientTransport] Connection established. Processing ${this.messageQueue.length} queued messages`,
     );
 
     // Process any queued messages
@@ -219,12 +219,12 @@ export class PostMessageClientTransport implements Transport {
 
   async send(
     message: JSONRPCMessage,
-    options?: TransportSendOptions
+    options?: TransportSendOptions,
   ): Promise<void> {
     if (!this.isConnected) {
       console.log(
         "DEBUG - [PostMessageClientTransport] Not connected yet, queueing message:",
-        message
+        message,
       );
       this.messageQueue.push({ message, options });
       return;
@@ -236,7 +236,7 @@ export class PostMessageClientTransport implements Transport {
 
     console.log(
       "DEBUG - [PostMessageClientTransport] Sending message:",
-      message
+      message,
     );
     this.serverWindow.postMessage(
       {
@@ -245,7 +245,7 @@ export class PostMessageClientTransport implements Transport {
         options,
         [MCP_TRANSPORT_ID]: true,
       },
-      this.serverOrigin
+      this.serverOrigin,
     );
   }
 
@@ -280,13 +280,13 @@ export class PostMessageClientTransport implements Transport {
       "DEBUG - [PostMessageClientTransport] Received message event from origin:",
       event.origin,
       "data:",
-      event.data
+      event.data,
     );
 
     // Handle server ready message
     if (event.data.type === "MCP_SERVER_READY" && !this.isConnected) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Server ready message received"
+        "DEBUG - [PostMessageClientTransport] Server ready message received",
       );
       this.isConnected = true;
       this.serverOrigin = event.origin;
@@ -301,7 +301,7 @@ export class PostMessageClientTransport implements Transport {
     // Skip repeated ready messages
     if (event.data.type === "MCP_SERVER_READY" && this.isConnected) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Ignoring duplicate server ready message"
+        "DEBUG - [PostMessageClientTransport] Ignoring duplicate server ready message",
       );
       return;
     }
@@ -310,7 +310,7 @@ export class PostMessageClientTransport implements Transport {
     if (event.data.type === "MCP_MESSAGE" && this.onmessage) {
       console.log(
         "DEBUG - [PostMessageClientTransport] Processing MCP message:",
-        event.data.message
+        event.data.message,
       );
       this.onmessage(event.data.message, event.data.extra);
     }
