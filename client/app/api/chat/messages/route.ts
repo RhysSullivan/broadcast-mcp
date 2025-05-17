@@ -3,13 +3,13 @@ import { saveMessages, convertToDBMessages } from "@/lib/chat-store";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, chatId } = await req.json();
+    const { messages, chatId, append = false } = await req.json();
 
     // Convert messages to DB format
     const dbMessages = convertToDBMessages(messages, chatId);
 
     // Save messages to database
-    await saveMessages({ messages: dbMessages });
+    await saveMessages({ messages: dbMessages, append });
 
     return NextResponse.json({ success: true });
   } catch (error) {
