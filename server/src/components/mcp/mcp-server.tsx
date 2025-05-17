@@ -1,9 +1,13 @@
 import {
+  PostMessageClientTransport,
+  PostMessageServerTransport,
+} from "@/lib/broadcastTransport";
+import {
   McpServer,
   ReadResourceCallback,
   ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { Implementation, Tool } from "@modelcontextprotocol/sdk/types.js";
+import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import { createContext, useContext, ReactNode, useCallback } from "react";
 
 const McpServerContext = createContext<McpServer | null>(null);
@@ -17,6 +21,8 @@ export function useMcpServer() {
   return context;
 }
 
+const transport = new PostMessageServerTransport();
+
 export function RegisterMcpServer(props: {
   allowedOrigins: string[];
   serverInfo: Implementation;
@@ -24,6 +30,8 @@ export function RegisterMcpServer(props: {
   children?: ReactNode;
 }) {
   let server = new McpServer(props.serverInfo);
+  server.connect(transport);
+
   props.register?.(server);
 
   const registerTool = useCallback(
