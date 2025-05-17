@@ -1,3 +1,4 @@
+import { PostMessageServerTransport } from "./transport";
 import {
   McpServer,
   ReadResourceCallback,
@@ -5,7 +6,6 @@ import {
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import { createContext, useContext, ReactNode, useCallback } from "react";
-import { PostMessageServerTransport } from "./transport";
 
 const McpServerContext = createContext<McpServer | null>(null);
 
