@@ -1,7 +1,7 @@
 import {
   PostMessageClientTransport,
   PostMessageServerTransport,
-} from "@/lib/broadcastTransport";
+} from "./transport";
 import {
   McpServer,
   ReadResourceCallback,

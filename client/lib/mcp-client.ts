@@ -29,17 +29,43 @@ export async function initializeMCPClients(
   mcpServers: MCPServerConfig[] = [],
   abortSignal?: AbortSignal
 ): Promise<MCPClientManager> {
-  const mcpClient = await createMCPClient({ transport });
+  console.log("DEBUG - initializing MCP clients");
 
-  const tools = await mcpClient.tools();
+  try {
+    // Create a connection timeout to avoid hanging
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error("Connection timeout waiting for MCP client to initialize")
+        );
+      }, 5000); // 5-second timeout
+    });
 
-  console.log(tools);
+    // Try to connect with a timeout
+    const mcpClient = await Promise.race([
+      createMCPClient({ transport }),
+      timeoutPromise,
+    ]);
 
-  return {
-    tools,
-    clients: [mcpClient],
-    cleanup: async () => await cleanupMCPClients([mcpClient]),
-  };
+    console.log("DEBUG - created mcp client", mcpClient);
+    const tools = await mcpClient.tools();
+
+    console.log("tools", tools);
+
+    return {
+      tools,
+      clients: [mcpClient],
+      cleanup: async () => await cleanupMCPClients([mcpClient]),
+    };
+  } catch (error) {
+    console.error("Failed to initialize MCP client:", error);
+    // Return empty tools on error to allow the application to continue
+    return {
+      tools: {},
+      clients: [],
+      cleanup: async () => {},
+    };
+  }
   // // Initialize tools
   // let tools = {};
   // const mcpClients: any[] = [];

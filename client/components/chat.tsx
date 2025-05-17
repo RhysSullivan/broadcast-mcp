@@ -28,9 +28,7 @@ interface ChatData {
   createdAt: string;
   updatedAt: string;
 }
-export const transport = new PostMessageClientTransport(
-  "http://localhost:3001"
-);
+export const transport = new PostMessageClientTransport();
 
 export default function Chat() {
   const router = useRouter();
