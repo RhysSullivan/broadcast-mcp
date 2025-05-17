@@ -8,6 +8,7 @@ import { useSettings } from '@/hooks/use-settings';
 import CustomToaster from '@/components/ui/toast';
 import { Provider as JotaiProvider } from 'jotai';
 import type { PropsWithChildren } from 'react';
+import { MCPProvider } from './mcp-provider';
 import { ThemeProvider } from 'next-themes';
 
 export function ClientProviders({ children }: PropsWithChildren) {
@@ -25,11 +26,13 @@ export function ClientProviders({ children }: PropsWithChildren) {
           defaultTheme={theme}
         >
           <SidebarProvider>
-            <PostHogProvider>
-              {children}
-              <CustomToaster />
-              <Analytics />
-            </PostHogProvider>
+            <MCPProvider>
+              <PostHogProvider>
+                {children}
+                <CustomToaster />
+                <Analytics />
+              </PostHogProvider>
+            </MCPProvider>
           </SidebarProvider>
         </ThemeProvider>
       </JotaiProvider>
