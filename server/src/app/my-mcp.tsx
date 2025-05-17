@@ -1,5 +1,5 @@
 "use client";
-import { RegisterMcpServer } from "@/components/mcp/mcp-server";
+import { RegisterMcpServer } from "mcp-browser-transport";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 export function MyMcp(props: { children: React.ReactNode }) {

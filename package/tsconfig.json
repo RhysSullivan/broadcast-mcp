@@ -8,6 +8,7 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "lib": ["ES2022", "DOM"],
+    "jsx": "react-jsx",
     "declaration": true
   },
   "include": ["src/**/*"],
