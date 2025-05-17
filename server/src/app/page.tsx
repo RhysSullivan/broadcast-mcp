@@ -2,18 +2,19 @@
 import { RegisterMcpServer, useMcpServer } from "@/components/mcp/mcp-server";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+
 function Email(props: {
   email: { from: string; subject: string; body: string };
 }) {
   const server = useMcpServer();
 
-  // server.resource(
-  //   `email://${props.email.from}`,
-  //   new ResourceTemplate("email://{name}", { list: undefined }),
-  //   async (uri, { name }) => ({
-  //     contents: [{ uri: uri.href, text: `Hello, ${name}!` }],
-  //   })
-  // );
+  server.resource(
+    `email://${props.email.from}`,
+    new ResourceTemplate("email://{name}", { list: undefined }),
+    async (uri, { name }) => ({
+      contents: [{ uri: uri.href, text: `Hello, ${name}!` }],
+    })
+  );
   return (
     <div className="max-w-2xl mx-auto my-4 p-6 bg-white rounded-lg shadow-md border border-gray-200">
       <div className="flex justify-between items-center mb-4">
