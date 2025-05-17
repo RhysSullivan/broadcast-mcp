@@ -19,6 +19,7 @@ import { useMCP } from "@/lib/context/mcp-context";
 import { createOpenAI } from "@ai-sdk/openai";
 import { smoothStream, streamText } from "ai";
 import { initializeMCPClients } from "../lib/mcp-client";
+import { PostMessageClientTransport } from "@/lib/transport";
 
 // Type for chat data from DB
 interface ChatData {
@@ -27,6 +28,9 @@ interface ChatData {
   createdAt: string;
   updatedAt: string;
 }
+export const transport = new PostMessageClientTransport(
+  "http://localhost:3001"
+);
 
 export default function Chat() {
   const router = useRouter();

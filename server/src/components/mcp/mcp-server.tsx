@@ -30,9 +30,9 @@ export function RegisterMcpServer(props: {
   children?: ReactNode;
 }) {
   let server = new McpServer(props.serverInfo);
-  server.connect(transport);
 
   props.register?.(server);
+  server.connect(transport);
 
   const registerTool = useCallback(
     (name: string, description: string, cb: ToolCallback) => {
