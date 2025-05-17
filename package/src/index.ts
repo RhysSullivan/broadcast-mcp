@@ -17,32 +17,34 @@ export class PostMessageServerTransport implements Transport {
 
   async start(): Promise<void> {
     console.log("DEBUG - [PostMessageServerTransport] Starting server...");
-    // Server must be opened by a client
-    if (!window.opener) {
+
+    // Server must be opened by a client - either as a window or iframe
+    const parentWindow = window.opener || window.parent;
+    if (parentWindow === window) {
       console.error(
-        "DEBUG - [PostMessageServerTransport] No opener window found",
+        "DEBUG - [PostMessageServerTransport] No parent or opener window found"
       );
-      throw new Error("Server must be opened by a client window");
+      throw new Error("Server must be opened by a client");
     }
 
     // Set up message listener
     window.addEventListener("message", this.handleMessage);
     console.log(
-      "DEBUG - [PostMessageServerTransport] Message listener attached",
+      "DEBUG - [PostMessageServerTransport] Message listener attached"
     );
 
     // Wait for first message from client to establish origin
     await new Promise<void>((resolve) => {
-      // Notify opener we're ready once
+      // Notify parent we're ready once
       console.log(
-        "DEBUG - [PostMessageServerTransport] Sending ready message to opener",
+        "DEBUG - [PostMessageServerTransport] Sending ready message to parent"
       );
-      window.opener.postMessage(
+      parentWindow.postMessage(
         {
           type: "MCP_SERVER_READY",
           [MCP_TRANSPORT_ID]: true,
         },
-        "*",
+        "*"
       );
 
       // Function to check if we're connected
@@ -60,11 +62,11 @@ export class PostMessageServerTransport implements Transport {
 
   async send(
     message: JSONRPCMessage,
-    options?: TransportSendOptions,
+    options?: TransportSendOptions
   ): Promise<void> {
     if (!this.isConnected || !this.clientWindow || !this.clientOrigin) {
       console.error(
-        "DEBUG - [PostMessageServerTransport] Cannot send - not connected to client",
+        "DEBUG - [PostMessageServerTransport] Cannot send - not connected to client"
       );
       throw new Error("Not connected to client");
     }
@@ -73,7 +75,7 @@ export class PostMessageServerTransport implements Transport {
       "DEBUG - [PostMessageServerTransport] Sending message:",
       message,
       "with options:",
-      options,
+      options
     );
     this.clientWindow.postMessage(
       {
@@ -82,13 +84,13 @@ export class PostMessageServerTransport implements Transport {
         options,
         [MCP_TRANSPORT_ID]: true,
       },
-      this.clientOrigin,
+      this.clientOrigin
     );
   }
 
   async close(): Promise<void> {
     console.log(
-      "DEBUG - [PostMessageServerTransport] Closing server connection",
+      "DEBUG - [PostMessageServerTransport] Closing server connection"
     );
     window.removeEventListener("message", this.handleMessage);
     this.isConnected = false;
@@ -99,7 +101,7 @@ export class PostMessageServerTransport implements Transport {
       this.onclose();
     }
     console.log(
-      "DEBUG - [PostMessageServerTransport] Server connection closed",
+      "DEBUG - [PostMessageServerTransport] Server connection closed"
     );
   }
 
@@ -113,28 +115,31 @@ export class PostMessageServerTransport implements Transport {
       "DEBUG - [PostMessageServerTransport] Received message event from origin:",
       event.origin,
       "data:",
-      event.data,
+      event.data
     );
 
     // If this is our first message, establish the client connection
-    if (!this.isConnected && event.source === window.opener) {
+    if (
+      !this.isConnected &&
+      (event.source === window.opener || event.source === window.parent)
+    ) {
       console.log(
-        "DEBUG - [PostMessageServerTransport] Establishing client connection",
+        "DEBUG - [PostMessageServerTransport] Establishing client connection"
       );
-      this.clientWindow = window.opener;
+      this.clientWindow = event.source as Window;
       this.clientOrigin = event.origin;
       this.isConnected = true;
       this.connectionEstablished = true;
       console.log(
         "DEBUG - [PostMessageServerTransport] Client connection established with origin:",
-        this.clientOrigin,
+        this.clientOrigin
       );
     }
 
     if (event.data.type === "MCP_MESSAGE" && this.onmessage) {
       console.log(
         "DEBUG - [PostMessageServerTransport] Processing MCP message:",
-        event.data.message,
+        event.data.message
       );
       this.onmessage(event.data.message, event.data.extra);
     }
@@ -147,7 +152,7 @@ export class PostMessageServerTransport implements Transport {
 }
 
 export class PostMessageClientTransport implements Transport {
-  private serverWindow: Window | null = null;
+  private serverFrame: HTMLIFrameElement | null = null;
   private serverOrigin: string | null = null;
   private isConnected = false;
   private messageQueue: {
@@ -159,7 +164,7 @@ export class PostMessageClientTransport implements Transport {
 
   async start(): Promise<void> {
     console.log(
-      "DEBUG - [PostMessageClientTransport] Starting connection attempt...",
+      "DEBUG - [PostMessageClientTransport] Starting connection attempt..."
     );
 
     if (this.isConnected) {
@@ -169,31 +174,30 @@ export class PostMessageClientTransport implements Transport {
 
     if (this.connectionPromise) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Connection already in progress, waiting...",
+        "DEBUG - [PostMessageClientTransport] Connection already in progress, waiting..."
       );
       return this.connectionPromise;
     }
 
-    // Create a window that hosts the server in an iframe
-    const serverWindow = window.open(
-      "http://localhost:3001",
-      "_blank",
-      "width=400,height=400",
-    );
+    // Create an invisible iframe to host the server
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none"; // Hide the iframe
+    iframe.src = "http://localhost:3001";
+    document.body.appendChild(iframe);
 
-    if (!serverWindow) {
-      throw new Error("Failed to open server window");
+    if (!iframe.contentWindow) {
+      throw new Error("Failed to create server iframe");
     }
 
     console.log(
-      "DEBUG - [PostMessageClientTransport] Server window opened successfully",
+      "DEBUG - [PostMessageClientTransport] Server iframe created successfully"
     );
-    this.serverWindow = serverWindow;
+    this.serverFrame = iframe;
 
     // Set up message listener
     window.addEventListener("message", this.handleMessage);
     console.log(
-      "DEBUG - [PostMessageClientTransport] Message listener attached",
+      "DEBUG - [PostMessageClientTransport] Message listener attached"
     );
 
     // Create a promise that resolves when connection is established
@@ -206,7 +210,7 @@ export class PostMessageClientTransport implements Transport {
 
     // Process any messages that were queued while waiting for connection
     console.log(
-      `DEBUG - [PostMessageClientTransport] Connection established. Processing ${this.messageQueue.length} queued messages`,
+      `DEBUG - [PostMessageClientTransport] Connection established. Processing ${this.messageQueue.length} queued messages`
     );
 
     // Process any queued messages
@@ -219,33 +223,33 @@ export class PostMessageClientTransport implements Transport {
 
   async send(
     message: JSONRPCMessage,
-    options?: TransportSendOptions,
+    options?: TransportSendOptions
   ): Promise<void> {
     if (!this.isConnected) {
       console.log(
         "DEBUG - [PostMessageClientTransport] Not connected yet, queueing message:",
-        message,
+        message
       );
       this.messageQueue.push({ message, options });
       return;
     }
 
-    if (!this.serverWindow || !this.serverOrigin) {
+    if (!this.serverFrame?.contentWindow || !this.serverOrigin) {
       throw new Error("Transport not started");
     }
 
     console.log(
       "DEBUG - [PostMessageClientTransport] Sending message:",
-      message,
+      message
     );
-    this.serverWindow.postMessage(
+    this.serverFrame.contentWindow.postMessage(
       {
         type: "MCP_MESSAGE",
         message,
         options,
         [MCP_TRANSPORT_ID]: true,
       },
-      this.serverOrigin,
+      this.serverOrigin
     );
   }
 
@@ -254,9 +258,9 @@ export class PostMessageClientTransport implements Transport {
 
     window.removeEventListener("message", this.handleMessage);
 
-    if (this.serverWindow) {
-      this.serverWindow.close();
-      this.serverWindow = null;
+    if (this.serverFrame) {
+      document.body.removeChild(this.serverFrame);
+      this.serverFrame = null;
     }
 
     this.isConnected = false;
@@ -280,13 +284,13 @@ export class PostMessageClientTransport implements Transport {
       "DEBUG - [PostMessageClientTransport] Received message event from origin:",
       event.origin,
       "data:",
-      event.data,
+      event.data
     );
 
     // Handle server ready message
     if (event.data.type === "MCP_SERVER_READY" && !this.isConnected) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Server ready message received",
+        "DEBUG - [PostMessageClientTransport] Server ready message received"
       );
       this.isConnected = true;
       this.serverOrigin = event.origin;
@@ -301,7 +305,7 @@ export class PostMessageClientTransport implements Transport {
     // Skip repeated ready messages
     if (event.data.type === "MCP_SERVER_READY" && this.isConnected) {
       console.log(
-        "DEBUG - [PostMessageClientTransport] Ignoring duplicate server ready message",
+        "DEBUG - [PostMessageClientTransport] Ignoring duplicate server ready message"
       );
       return;
     }
@@ -310,7 +314,7 @@ export class PostMessageClientTransport implements Transport {
     if (event.data.type === "MCP_MESSAGE" && this.onmessage) {
       console.log(
         "DEBUG - [PostMessageClientTransport] Processing MCP message:",
-        event.data.message,
+        event.data.message
       );
       this.onmessage(event.data.message, event.data.extra);
     }
