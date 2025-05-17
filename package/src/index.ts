@@ -152,7 +152,7 @@ export class PostMessageServerTransport implements Transport {
 }
 
 export class PostMessageClientTransport implements Transport {
-  private serverFrame: HTMLIFrameElement | null = null;
+  private serverWindow: Window | null = null;
   private serverOrigin: string | null = null;
   private isConnected = false;
   private messageQueue: {
@@ -161,6 +161,13 @@ export class PostMessageClientTransport implements Transport {
   }[] = [];
   private connectionPromise: Promise<void> | null = null;
   private connectionResolve: (() => void) | null = null;
+  private serverUrl: string;
+  private openMethod: "window" | "iframe";
+
+  constructor(serverUrl: string, openMethod: "window" | "iframe" = "window") {
+    this.serverUrl = serverUrl;
+    this.openMethod = openMethod;
+  }
 
   async start(): Promise<void> {
     console.log(
@@ -179,20 +186,32 @@ export class PostMessageClientTransport implements Transport {
       return this.connectionPromise;
     }
 
-    // Create an invisible iframe to host the server
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none"; // Hide the iframe
-    iframe.src = "http://localhost:3001";
-    document.body.appendChild(iframe);
+    if (this.openMethod === "iframe") {
+      // Create an invisible iframe to host the server
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none"; // Hide the iframe
+      iframe.src = this.serverUrl;
+      document.body.appendChild(iframe);
 
-    if (!iframe.contentWindow) {
-      throw new Error("Failed to create server iframe");
+      if (!iframe.contentWindow) {
+        throw new Error("Failed to create server iframe");
+      }
+
+      console.log(
+        "DEBUG - [PostMessageClientTransport] Server iframe created successfully"
+      );
+      this.serverWindow = iframe.contentWindow;
+    } else {
+      // Open a new window
+      const serverWindow = window.open(this.serverUrl, "_blank");
+      if (!serverWindow) {
+        throw new Error("Failed to open server window");
+      }
+      console.log(
+        "DEBUG - [PostMessageClientTransport] Server window opened successfully"
+      );
+      this.serverWindow = serverWindow;
     }
-
-    console.log(
-      "DEBUG - [PostMessageClientTransport] Server iframe created successfully"
-    );
-    this.serverFrame = iframe;
 
     // Set up message listener
     window.addEventListener("message", this.handleMessage);
@@ -234,7 +253,7 @@ export class PostMessageClientTransport implements Transport {
       return;
     }
 
-    if (!this.serverFrame?.contentWindow || !this.serverOrigin) {
+    if (!this.serverWindow || !this.serverOrigin) {
       throw new Error("Transport not started");
     }
 
@@ -242,7 +261,7 @@ export class PostMessageClientTransport implements Transport {
       "DEBUG - [PostMessageClientTransport] Sending message:",
       message
     );
-    this.serverFrame.contentWindow.postMessage(
+    this.serverWindow.postMessage(
       {
         type: "MCP_MESSAGE",
         message,
@@ -258,9 +277,16 @@ export class PostMessageClientTransport implements Transport {
 
     window.removeEventListener("message", this.handleMessage);
 
-    if (this.serverFrame) {
-      document.body.removeChild(this.serverFrame);
-      this.serverFrame = null;
+    if (this.serverWindow) {
+      if (this.openMethod === "iframe") {
+        const iframe = this.serverWindow.frameElement as HTMLIFrameElement;
+        if (iframe && iframe.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+      } else {
+        this.serverWindow.close();
+      }
+      this.serverWindow = null;
     }
 
     this.isConnected = false;

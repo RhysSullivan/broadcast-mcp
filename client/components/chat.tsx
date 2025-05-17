@@ -10,16 +10,15 @@ import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import { getUserId } from "@/lib/user-id";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-import { STORAGE_KEYS } from "@/lib/constants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToUIMessages } from "@/lib/chat-store";
 import { type Message as DBMessage } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
-import { useMCP } from "@/lib/context/mcp-context";
+import { MCPServer, useMCP } from "@/lib/context/mcp-context";
 import { createOpenAI } from "@ai-sdk/openai";
 import { smoothStream, streamText } from "ai";
 import { initializeMCPClients } from "../lib/mcp-client";
-import { PostMessageClientTransport } from "mcp-browser-transport";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 // Type for chat data from DB
 interface ChatData {
@@ -28,7 +27,6 @@ interface ChatData {
   createdAt: string;
   updatedAt: string;
 }
-export const transport = new PostMessageClientTransport();
 
 export default function Chat() {
   const router = useRouter();
@@ -44,7 +42,18 @@ export default function Chat() {
   const [generatedChatId, setGeneratedChatId] = useState<string>("");
 
   // Get MCP server data from context
-  const { mcpServersForApi } = useMCP();
+  const [selectedMcpServers, setSelectedMcpServers] = useLocalStorage<string[]>(
+    STORAGE_KEYS.SELECTED_MCP_SERVERS,
+    []
+  );
+  const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
+    STORAGE_KEYS.MCP_SERVERS,
+    []
+  );
+
+  const mcpServersForApi = useMemo(() => {
+    return selectedMcpServers.map((id) => mcpServers.find((s) => s.id === id));
+  }, [selectedMcpServers, mcpServers]);
 
   // Initialize userId
   useEffect(() => {
