@@ -1,0 +1,46 @@
+{
+  "name": "zero",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.2.5",
+  "scripts": {
+    "prepare": "husky",
+    "cf-install": "cd apps/server && (cp ../../.env .dev.vars)||true && bun run types",
+    "dev": "dotenv -- turbo run dev",
+    "build": "dotenv -- turbo run --filter=@zero/mail build",
+    "start": "dotenv -- turbo run start",
+    "lint": "dotenv -- turbo run lint",
+    "format": "prettier --write apps/**/*.{ts,tsx} --log-level silent",
+    "check": "bun run check:format && bun run lint",
+    "check:format": "prettier . --check",
+    "lint-staged": "prettier --write --ignore-unknown",
+    "docker:db:up": "docker compose -f docker-compose.db.yaml up -d",
+    "docker:db:down": "docker compose -f docker-compose.db.yaml down",
+    "docker:db:clean": "docker compose -f docker-compose.db.yaml down -v",
+    "db:generate": "dotenv -- turbo run db:generate",
+    "db:migrate": "dotenv -- turbo run db:migrate",
+    "db:push": "dotenv -- turbo run db:push",
+    "db:studio": "dotenv -- turbo run db:studio",
+    "scripts": "dotenv -- bun run --cwd apps/mail --silent --elide-lines=0 scripts",
+    "mcp": "dotenv -- bun run apps/server/src/mcp-server/index.ts",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org zero-7y --project nextjs ./apps/mail/.next && sentry-cli sourcemaps upload --org zero-7y --project nextjs ./apps/mail/.next"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.8",
+    "@zero/tsconfig": "workspace:*",
+    "dotenv-cli": "^8.0.0",
+    "husky": "9.1.7",
+    "prettier": "3.5.3",
+    "prettier-plugin-sort-imports": "1.8.6",
+    "prettier-plugin-tailwindcss": "0.6.11",
+    "turbo": "^2.5.0",
+    "typescript": "5.8.2"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "@juliusmarminge/trpc-mcp": "^0.2.0"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "zero-server",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/main.ts",
+  "env": {
+    "staging": {
+      "limits": {
+        "cpu_ms": 300000,
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "DurableMailbox",
+            "name": "DURABLE_MAILBOX",
+          },
+        ],
+      },
+      "migrations": [
+        {
+          "tag": "v1",
+          "new_classes": ["DurableMailbox"],
+        },
+      ],
+      "services": [
+        {
+          "binding": "zero",
+          "service": "zero-worker",
+        },
+      ],
+      "observability": {
+        "enabled": true,
+      },
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          "id": "57834ddb6716440496c8836f6d99bc9a",
+          "localConnectionString": "postgresql://postgres:postgres@localhost:5432/zerodotemail",
+        },
+      ],
+      "vars": {
+        "NODE_ENV": "development",
+        "FORCE_GMAIL_CONSENT": "true",
+      },
+      "kv_namespaces": [
+        {
+          "binding": "subscribed_accounts",
+          "id": "cd3ff4a80734444c98aee76ea9166e3d",
+        },
+        {
+          "binding": "connection_labels",
+          "id": "26c5a521b1294ef88d36b96e5617c428",
+        },
+        {
+          "binding": "prompts_storage",
+          "id": "1caf4e863e2149519cef97f2ba3c9851",
+        },
+        {
+          "binding": "connection_limits",
+          "id": "19d415777f554b7c8fbe6eca7dc87918",
+        },
+      ],
+    },
+    "production": {
+      "observability": {
+        "enabled": true,
+      },
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          "id": "",
+          "localConnectionString": "postgresql://postgres:postgres@localhost:5432/zerodotemail",
+        },
+      ],
+      "vars": {
+        "NODE_ENV": "production",
+        "FORCE_GMAIL_CONSENT": "true",
+      },
+      "kv_namespaces": [
+        {
+          "binding": "subscribed_accounts",
+          "id": "",
+        },
+        {
+          "binding": "connection_labels",
+          "id": "",
+        },
+        {
+          "binding": "prompts_storage",
+          "id": "",
+        },
+        {
+          "binding": "connection_limits",
+          "id": "",
+        },
+      ],
+    },
+  },
+}
