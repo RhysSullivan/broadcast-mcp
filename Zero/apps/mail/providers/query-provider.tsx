@@ -97,6 +97,7 @@ const getUrl = () => {
 };
 
 export const { TRPCProvider, useTRPC, useTRPCClient } = createTRPCContext<AppRouter>();
+// export const trpc = createTRPCR
 
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
