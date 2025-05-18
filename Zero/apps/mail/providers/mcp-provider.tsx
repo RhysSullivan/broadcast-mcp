@@ -3,12 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RegisterMcpServer } from 'broadcast-mcp';
 import { trpcClient } from './query-provider';
 import { defaultPageSize } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
 export function MCPProvider(props: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const router = useRouter();
   console.log(queryClient);
   return (
     <RegisterMcpServer
