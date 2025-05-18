@@ -357,15 +357,45 @@ export class PostMessageClientTransport implements Transport {
     // Critical: Check if the window we are supposed to reuse is actually still open.
     if (this.serverWindow && this.serverWindow.closed) {
       console.warn(
-        "DEBUG - [PostMessageClientTransport] Server window was previously open but is now closed. This transport instance cannot reconnect."
+        "DEBUG - [PostMessageClientTransport] Server window was previously open but is now closed. Creating new instance."
       );
       // Remove it from our own static map as it's dead.
       PostMessageClientTransport.serverWindows.delete(this.options.serverUrl);
       this.serverWindow = null;
       this.serverIFrame = null;
-      throw new Error(
-        "Server window is closed; cannot restart this transport instance. A new transport instance should be created."
-      );
+
+      // Create new instance instead of throwing
+      if (this.options.openMethod === "iframe") {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = this.options.serverUrl;
+        document.body.appendChild(iframe);
+
+        if (!iframe.contentWindow) {
+          throw new Error("Failed to create server iframe");
+        }
+
+        this.serverIFrame = iframe;
+        this.serverWindow = iframe.contentWindow;
+        if (this.options.keepWindowOpen) {
+          PostMessageClientTransport.serverWindows.set(
+            this.options.serverUrl,
+            iframe
+          );
+        }
+      } else {
+        const serverWindow = window.open(this.options.serverUrl, "_blank");
+        if (!serverWindow) {
+          throw new Error("Failed to open server window");
+        }
+        this.serverWindow = serverWindow;
+        if (this.options.keepWindowOpen) {
+          PostMessageClientTransport.serverWindows.set(
+            this.options.serverUrl,
+            serverWindow
+          );
+        }
+      }
     }
 
     // If serverWindow is null but keepWindowOpen is true, something is wrong (constructor should have handled it or window was closed and logic above hit).
