@@ -70,7 +70,7 @@
     "@tiptap/extension-placeholder": "2.11.5",
     "@tiptap/extension-text": "2.11.5",
     "@tiptap/html": "2.11.5",
-    "mcp-browser-transport": "link:mcp-browser-transport",
+    "broadcast-mcp": "0.0.4",
     "@tiptap/pm": "2.11.5",
     "@tiptap/react": "2.11.5",
     "@tiptap/starter-kit": "2.11.5",

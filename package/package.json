@@ -1,6 +1,6 @@
 {
-  "name": "mcp-browser-transport",
-  "version": "1.0.0",
+  "name": "broadcast-mcp",
+  "version": "0.0.4",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,7 +16,8 @@
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "dev:client": "cd examples/client && bun run dev",
     "dev:server": "cd examples/server && bun run dev",
-    "dev:all": "concurrently \"bun run dev\" \"bun run dev:client\" \"bun run dev:server\""
+    "dev:all": "concurrently \"bun run dev\" \"bun run dev:client\" \"bun run dev:server\"",
+    "publish": "bun run build && npm publish"
   },
   "devDependencies": {
     "@types/bun": "latest",
