@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { RegisterMcpServer } from "@/components/mcp/mcp-server";
-import { z } from "zod";
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MyMcp } from "./my-mcp";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,9 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <MyMcp>{children}</MyMcp>
-      </body>
+      <body className="h-screen w-screen">{children}</body>
     </html>
   );
 }
