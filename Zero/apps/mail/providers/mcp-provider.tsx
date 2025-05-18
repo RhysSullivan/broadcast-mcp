@@ -3,10 +3,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { RegisterMcpServer } from 'broadcast-mcp';
 import { trpcClient } from './query-provider';
 import { defaultPageSize } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
 export function MCPProvider(props: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  console.log(queryClient);
   return (
     <RegisterMcpServer
       allowedOrigins={[]}
@@ -18,7 +21,7 @@ export function MCPProvider(props: { children: React.ReactNode }) {
         server.tool(
           'drafts-create',
           { subject: z.string(), message: z.string(), to: z.string() },
-          async ({ subject, message, to }: { subject: string; message: string; to: string }) => {
+          async ({ subject, message, to }) => {
             const draft = await trpcClient.drafts.create.mutate({ subject, message, to });
             queryClient.invalidateQueries({ queryKey: ['drafts'] });
             return {
@@ -45,35 +48,35 @@ export function MCPProvider(props: { children: React.ReactNode }) {
             };
           },
         );
-        server.tool(
-          'mail-send',
-          { subject: z.string(), message: z.string(), to: z.string() },
-          async ({ subject, message, to }: { subject: string; message: string; to: string }) => {
-            const draft = await trpcClient.mail.send.mutate({
-              subject,
-              message,
-              to: [{ email: to }],
-            });
-            queryClient.invalidateQueries({ queryKey: ['drafts'] });
-            return {
-              content: [{ type: 'text', text: JSON.stringify(draft) }],
-            };
-          },
-        );
-        server.tool('mail-delete', { id: z.string() }, async ({ id }: { id: string }) => {
+        server.tool('mail-delete', { id: z.string() }, async ({ id }) => {
           const draft = await trpcClient.mail.delete.mutate({ id });
           queryClient.invalidateQueries({ queryKey: ['drafts'] });
           return {
             content: [{ type: 'text', text: JSON.stringify(draft) }],
           };
         });
-        server.tool('mail-get', { id: z.string() }, async ({ id }: { id: string }) => {
+        server.tool('mail-get', { id: z.string() }, async ({ id }) => {
           const draft = await trpcClient.mail.get.query({ id });
           queryClient.invalidateQueries({ queryKey: ['drafts'] });
           return {
             content: [{ type: 'text', text: JSON.stringify(draft) }],
           };
         });
+        server.tool(
+          'mail-send',
+          {
+            to: z.array(z.object({ email: z.string() })),
+            subject: z.string(),
+            message: z.string(),
+          },
+          async ({ to, subject, message }) => {
+            const result = await trpcClient.mail.send.mutate({ to, subject, message });
+            queryClient.invalidateQueries({ queryKey: ['mail'] });
+            return {
+              content: [{ type: 'text', text: JSON.stringify(result) }],
+            };
+          },
+        );
       }}
     >
       {props.children}
